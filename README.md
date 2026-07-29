@@ -26,20 +26,15 @@ Write Markdown, raise a PR, merge — the site rebuilds and deploys itself.
 
 1. Click **Use this template → Create a new repository** on GitHub.
 2. Set the visibility to **Internal**.
-3. Run the skill and let it configure the site:
+3. Configure it. In **GitHub Copilot Chat** (agent mode) or **Claude Code**, invoke the
+   `docs-site` skill that came with the template:
    ```
    /docs-site set up this docs site
    ```
-   It fills in `config/tech-docs.yml`, aligns the workflows, enables Pages, clears the
-   example content, and verifies the site is SSO-only. It asks you three questions —
-   service name, phase and Slack channel — and derives the rest from the repository.
+   Or follow **[SETUP.md](SETUP.md)** by hand.
 
-   Prefer to do it by hand, or not using an agent? **[SETUP.md](SETUP.md)** has the
-   same steps.
-
-**One step nobody can automate:** Settings → Pages → Visibility → **Private**. GitHub
-has no API for it, and it is what makes the site readable only by signed-in org
-members. The skill stops and asks you to do it, then checks that you have.
+Either way, one step has to be done in the browser: **Settings → Pages → Visibility →
+Private**. It is what makes the site readable only by signed-in org members.
 
 ## Repository layout
 
