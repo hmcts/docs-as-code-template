@@ -8,14 +8,12 @@ What to do in the repository you have just created from this template.
 /docs-site set up this docs site
 ```
 
-The skill makes all the file changes — steps 2, 3 and 7 — asks you three questions, and
-derives the rest from `git`. It then gives you a short checklist of the GitHub settings
-it cannot change by editing files, which is **step 1** below.
+The skill makes all the file changes — steps 2, 3 and 7 — and asks you a few questions.
+It then hands back a short checklist of the GitHub settings it cannot change by editing
+files, which is **step 1** below. Doing those by hand takes under a minute.
 
-**What the skill needs:** an agent that can run commands, and `git` (which every clone
-has). If `gh` is also installed and authenticated it will offer to enable Pages and
-check the visibility for you; without it, those simply stay on the closing checklist.
-Ruby and Node are only needed for local preview — not for using the skill.
+**The skill only edits files.** It makes no GitHub API calls, needs no credentials, and
+does not use `gh`. Ruby and Node are for local preview only — not for using the skill.
 
 The rest of this page is the same work by hand. Steps 1 and 2 are the ones that
 matter: until both are done your site either will not publish or will be readable by

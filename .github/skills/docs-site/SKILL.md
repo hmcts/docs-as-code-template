@@ -1,6 +1,6 @@
 ---
 name: docs-site
-description: "Set up and maintain a documentation site created from the docs-as-code template. Use when asked to: set up the docs site, configure the template, add a page, create a page, document something, add a section. Handles first-time setup (config, GitHub Pages, SSO verification, clearing example content) and ongoing page creation."
+description: "Set up and maintain a documentation site created from the docs-as-code template. Use when asked to: set up the docs site, configure the template, add a page, create a page, document something, add a section. Edits files only — first-time configuration and ongoing page creation — and hands back a short checklist of GitHub settings to apply by hand."
 ---
 
 # Docs Site Skill
@@ -31,45 +31,41 @@ itself, which is not a published site and must not be configured as one.
 Get a freshly created repository to a published, SSO-only site. Most values come from
 the repository itself; only three need a human.
 
-**Shape of this run:** every file edit happens first and always works. Anything needing
-GitHub *settings* is collected into a single checklist at the end (A7), so the run never
-stops half-finished. If `gh` is available you can tick some of that list off yourself;
-if not, it stays for the user.
+**Shape of this run:** this skill edits files. That is all it does. It makes no GitHub
+API calls, needs no credentials, and does not use `gh`. The two GitHub *settings* that
+cannot be changed by editing files go on a checklist at the end (A6) — applying them by
+hand takes under a minute.
 
-## A1 — Check what you can automate, and say so
+### Do not improvise around missing tools
 
-Before doing anything, work out whether `gh` is usable:
+If a command is unavailable, **abandon that approach**. Do not:
 
-```bash
-gh auth status
-```
+- install anything — `brew`, `npm`, `apt` or any other package manager
+- reach for alternative tooling — MCP servers, other CLIs, hand-rolled API calls
+- search the environment, shell profiles or `.env` files for tokens or credentials
+- retry a failed command with different authentication
 
-Then tell the user in one line what to expect, for example:
+Nothing here needs any of that. Ask the user, or put the item on the closing checklist.
 
-> `gh` is available — I'll configure the site and enable Pages, and you'll have one
-> manual step at the end.
+## A1 — Confirm the repository details
 
-or:
-
-> `gh` isn't available here, so I'll do all the file changes and give you a short list
-> of GitHub settings to apply at the end.
-
-Do not skip this. Silently omitting steps is what makes the run look broken.
-
-## A2 — Derive what you can
-
-Do not ask for either of these. Use `git`, not `gh` — every clone has `git`, whereas
-`gh` needs installing, authenticating and the right scopes, and the file edits below
-depend on getting these right:
+Two values are needed. **Ask the user.** If `git` offers a sensible default, propose it
+so they only have to confirm:
 
 ```bash
 git remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##'   # <org>/<repo>
 git symbolic-ref --short refs/remotes/origin/HEAD | sed 's#^origin/##'    # default branch
 ```
 
-If either returns nothing, ask the user rather than guessing.
+| Value | Example |
+|---|---|
+| `<org>/<repo>` | `hmcts/platform-ai-gateway-docs` |
+| default branch | `main` |
 
-## A3 — Ask three questions
+These read local git config — no network, no credentials. If `git` is unavailable or
+there is no remote, just ask. Do not infer either value any other way.
+
+## A2 — Ask three questions
 
 Propose a default for each so the user can simply accept it.
 
@@ -79,7 +75,7 @@ Propose a default for each so the user can simply accept it.
 | **Phase** — `Alpha`, `Beta` or `Live` | `Live` |
 | **Slack channel** — where a reader asks for help | `platops-build-notices` |
 
-## A4 — Write `config/tech-docs.yml`
+## A3 — Write `config/tech-docs.yml`
 
 ```yaml
 host: https://<org>.github.io/<repo>          # no trailing slash
@@ -95,7 +91,7 @@ default_owner_slack: <answer>
 Leave every other key as it is. The `Rakefile` reads `github_repo` from this file, so
 the link checker configures itself.
 
-## A5 — Align the workflows
+## A4 — Align the workflows
 
 Both trigger on `main`. If the default branch differs, change it in
 `.github/workflows/build.yaml` and `deploy.yaml` — otherwise nothing ever deploys and
@@ -110,7 +106,7 @@ true outside the template repository, so it does nothing there but confuse a rea
 
 Leave `build.yaml` alone; it has no guard.
 
-## A6 — Clear out the example content
+## A5 — Clear out the example content
 
 - Rewrite `source/index.html.md.erb` from a one-line description, keeping the
   frontmatter shape (`title`, `weight: 1`, `last_reviewed_on` today, `review_in`)
@@ -124,7 +120,7 @@ Leave `build.yaml` alone; it has no guard.
 If they have no content yet, leave one example section so the sidebar is not empty, and
 say that you have.
 
-## A7 — Report, then hand over the manual tasks
+## A6 — Report, then hand over the manual tasks
 
 First report what you changed:
 
@@ -144,28 +140,18 @@ bundle exec middleman build
 
 ### Manual tasks to complete
 
-Always end with this checklist, even if it is short. These are GitHub *settings* — they
-cannot be done by editing files.
+Always end with this checklist. These are GitHub *settings* and cannot be changed by
+editing files. Do not attempt them yourself — hand them over.
 
 > **1. Enable Pages.** Settings → Pages → Source: **GitHub Actions**
-> **2. Make it internal.** Settings → Pages → Visibility: **Private**
-> **3. Confirm.** Once deployed, opening the site while signed out should redirect you
->    to GitHub sign-in. If it serves the page instead, visibility is not set.
+> **2. Check visibility.** Settings → Pages → Visibility should be **Private**. GitHub
+>    usually sets this by default for internal repositories, so it may already be right.
+> **3. Commit and push.** The site deploys on push to the default branch.
+> **4. Confirm.** Signed out, opening the site should redirect you to GitHub sign-in.
+>    If it serves the page instead, visibility is not set — go back to 2.
 
-If `gh` is available, offer to do 1 and verify 2 rather than leaving them on the list:
-
-```bash
-gh api -X POST repos/<org>/<repo>/pages -f build_type=workflow   # 409 = already on
-gh api repos/<org>/<repo>/pages --jq .public                     # must print: false
-```
-
-Both need repo admin. If either fails, do not retry or work around it — put the step
-back on the checklist and say why.
-
-**On visibility, never take "done" as evidence.** If you can check and `.public` is
-`true`, say plainly that the site is currently readable by anyone with the link. Note
-that GitHub usually defaults Pages to private for internal repositories, so this may
-already be correct — check before asking the user to change it.
+Step 4 is the one that matters: it is the only proof the documentation is not
+world-readable. Say so, rather than listing it as an afterthought.
 
 Then offer to add their first real page.
 
