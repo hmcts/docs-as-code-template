@@ -1,0 +1,65 @@
+---
+title: Example Page
+weight: 10
+last_reviewed_on: 2026-07-28
+review_in: 6 months
+---
+
+# <%= current_page.data.title %>
+
+This page exists so you can see a working page before writing your own, and so the
+`docs-site` skill has a real section index to update. Delete it once you have
+content of your own.
+
+## Frontmatter
+
+Every page needs the four keys at the top of this file:
+
+| Key | Purpose |
+|---|---|
+| `title` | Shown in the sidebar, the browser tab, and as the `<h1>` via the ERB line below the frontmatter |
+| `weight` | Sidebar ordering within the folder. Lower appears first. |
+| `last_reviewed_on` | Drives the "last reviewed" notice and the review reminder |
+| `review_in` | How long until the page is flagged as needing review, e.g. `6 months` |
+
+Use gaps of 10 for `weight` (10, 20, 30…) so a page can be inserted later without
+renumbering every sibling.
+
+One convention worth keeping: a section's `index.html.md.erb` uses `weight: 1`, and
+its pages start at `10`. The index's weight orders that *section* among its siblings
+while page weights order pages *within* it — and because both live in the same folder,
+letting them share a number makes the sidebar order unstable.
+
+## Writing
+
+Pages are Markdown with ERB, in files named `.html.md.erb`. Ordinary Markdown works —
+headings, lists, tables, code blocks:
+
+```bash
+echo "fenced code blocks are syntax highlighted"
+```
+
+Link to another page in the same folder with its built `.html` name, not the source
+filename: `[Example Page](example-page.html)`.
+
+Link to a page in another folder relatively: `[Home](../index.html)`.
+
+## Images
+
+Put images in `source/assets/images/` and reference them with a root-relative path:
+
+```markdown
+![Description of what the image shows](/assets/images/my-diagram.png)
+```
+
+Always write real alt text. It is what a screen reader announces, and the link
+checker is configured to allow missing alt text rather than enforce it — so nothing
+will catch an empty one for you.
+
+## Previewing
+
+```bash
+bundle exec middleman server   # http://localhost:4567
+```
+
+The site rebuilds as you save.

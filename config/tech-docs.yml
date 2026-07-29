@@ -1,0 +1,28 @@
+---
+host: https://hmcts.github.io/docs-as-code-template
+
+# Header
+show_govuk_logo: false
+service_name: Docs as Code Template          
+service_link: https://github.com/hmcts
+phase: Live                                  
+
+# Links shown on the right-hand side of the header
+header_links:
+  GitHub: https://github.com/hmcts/docs-as-code-template
+
+enable_search: true
+
+multipage_nav: true
+collapsible_nav: true
+
+max_toc_heading_level: 1
+
+prevent_indexing: false
+
+show_contribution_banner: true
+github_repo: hmcts/docs-as-code-template     
+github_branch: main                          
+
+owner_slack_workspace: hmcts-reform
+default_owner_slack: platops-build-notices   

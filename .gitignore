@@ -1,0 +1,11 @@
+build/
+.bundle/
+vendor/
+.sass-cache/
+.DS_Store
+*.swp
+*.swo
+.vscode/mcp.json
+
+# Gemfile.lock is intentionally NOT ignored — it is committed so that CI, Codespaces
+# and every engineer build the site with identical gem versions.

@@ -1,0 +1,7 @@
+$govuk-font-family: nta, Helvetica, sans-serif;
+@import "govuk_tech_docs";
+
+// Add your own overrides below.
+.technical-documentation blockquote {
+  margin-left: 0;
+}
