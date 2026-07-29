@@ -131,7 +131,7 @@ say plainly that the site is currently readable by anyone with the link.
 - Rename `source/example-section/` to a real section and rewrite its `index.html.md.erb`
 - Delete `source/example-section/example-page.html.md.erb`
 - Rewrite `README.md` to describe this site rather than the template
-- **Keep** `source/templates/page-template.html.md.erb` — Part B reads it
+- **Keep** `.github/page-template.md` — Part B reads it. It lives outside `source/` deliberately: anything under `source/` is published as a page.
 - **Keep** `source/images/` (favicons) and `source/javascripts/`, `source/stylesheets/`
   — the layout requires these and the build breaks without them
 
@@ -171,7 +171,7 @@ time; accept "unknown" or "TBC" as placeholders.
 | **Your name / team** | Used in the Change history row |
 
 List directories under `source/`, ignoring `assets/`, `images/`, `javascripts/`,
-`stylesheets/` and `templates/`, to find the available sections.
+`stylesheets/`, to find the available sections.
 
 > **If the section does not exist:** create the folder, add an `index.html.md.erb`
 > modelled on an existing section index, and add a row for it to the table in
@@ -204,7 +204,7 @@ Lowercase kebab-case, then `.html.md.erb`:
 
 ## B3 — Create the file
 
-Read `source/templates/page-template.html.md.erb` and use it as the structure — **do
+Read `.github/page-template.md` and use it as the structure — **do
 not paste a copy from memory**; it is the site's canonical shape and teams change it.
 
 Fill in `title`, the computed `weight`, `last_reviewed_on` (today, `YYYY-MM-DD`), and
@@ -259,7 +259,7 @@ List anything ⚠️ or ❌ and ask whether to fill the gaps now or leave them f
 
 ## Notes
 
-- `source/templates/page-template.html.md.erb` is the canonical page structure. If the
+- `.github/page-template.md` is the canonical page structure. If the
   shape of pages changes, change it there — Part B follows it.
 - `weight:` orders pages within a folder. Gaps of 10 leave room to insert later.
 - Building locally needs **Node** alongside Ruby. Without it the HTML still builds but

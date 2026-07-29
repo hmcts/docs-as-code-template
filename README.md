@@ -44,8 +44,6 @@ Private**. It is what makes the site readable only by signed-in org members.
 │  ├─ example-section/                ← a section: an index plus its pages
 │  │  ├─ index.html.md.erb
 │  │  └─ example-page.html.md.erb
-│  ├─ templates/
-│  │  └─ page-template.html.md.erb    ← canonical page structure
 │  ├─ assets/images/                  ← images used in your pages
 │  ├─ images/                         ← favicons (the layout expects them here)
 │  └─ javascripts/, stylesheets/      ← asset entry points, leave as they are
@@ -55,6 +53,7 @@ Private**. It is what makes the site readable only by signed-in org members.
 ├─ Gemfile                            ← Ruby dependencies
 ├─ .devcontainer.json                 ← Codespaces preview
 ├─ .github/workflows/                 ← PR build and Pages deploy
+├─ .github/page-template.md           ← canonical page structure (outside source/, so it never publishes)
 ├─ .github/skills/docs-site/          ← agent skill (GitHub Copilot)
 └─ .claude/skills/docs-site/          ← agent skill (Claude Code)
 ```
@@ -91,7 +90,7 @@ In GitHub Copilot Chat (agent mode) or Claude Code:
 /docs-site add a page about our deployment pipeline
 ```
 
-The skill interviews you, creates the file from `source/templates/page-template.html.md.erb`,
+The skill interviews you, creates the file from `.github/page-template.md`,
 works out the right `weight`, updates the section index, and reports anything left
 as a placeholder. Both copies of the skill are the same file — if you change one,
 change the other.

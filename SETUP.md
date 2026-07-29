@@ -120,7 +120,7 @@ This is what stops a broken page reaching the published site.
 - Replace `source/index.html.md.erb` with your own home page
 - Rename `source/example-section/` to a real section and rewrite its `index.html.md.erb`
 - Delete `source/example-section/example-page.html.md.erb` once you have real pages
-- Keep `source/templates/page-template.html.md.erb` — the `docs-site` skill reads it,
+- Keep `.github/page-template.md` — the `docs-site` skill reads it,
   and it is where you change the shape of your pages
 - Update this repository's `README.md` to describe *your* site rather than the template
 
