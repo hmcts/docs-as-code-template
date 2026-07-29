@@ -10,7 +10,11 @@ One skill, two jobs. Work out which is needed before doing anything.
 ## Step 0 — Which job is this?
 
 Read `github_repo` from `config/tech-docs.yml` and compare it with the actual
-repository (`gh repo view --json nameWithOwner --jq .nameWithOwner`).
+repository:
+
+```bash
+git remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##'
+```
 
 - **They differ, or `github_repo` is still `hmcts/docs-as-code-template`** → the site
   has never been configured. Run **Part A — First-time setup**, then offer Part B.
@@ -27,23 +31,45 @@ itself, which is not a published site and must not be configured as one.
 Get a freshly created repository to a published, SSO-only site. Most values come from
 the repository itself; only three need a human.
 
-## A1 — Derive what you can
+**Shape of this run:** every file edit happens first and always works. Anything needing
+GitHub *settings* is collected into a single checklist at the end (A7), so the run never
+stops half-finished. If `gh` is available you can tick some of that list off yourself;
+if not, it stays for the user.
 
-Do not ask for any of this:
+## A1 — Check what you can automate, and say so
 
-| Value | Command |
-|---|---|
-| `<org>/<repo>` | `gh repo view --json nameWithOwner --jq .nameWithOwner` |
-| default branch | `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` |
-| repo visibility | `gh repo view --json visibility --jq .visibility` |
+Before doing anything, work out whether `gh` is usable:
 
-If `gh auth status` fails, say which steps you cannot run and give the manual
-equivalent rather than failing part-way through.
+```bash
+gh auth status
+```
 
-If visibility is not `INTERNAL` or `PRIVATE`, warn plainly: a public repository cannot
-have an access-controlled Pages site, so the documentation would be world-readable.
+Then tell the user in one line what to expect, for example:
 
-## A2 — Ask three questions
+> `gh` is available — I'll configure the site and enable Pages, and you'll have one
+> manual step at the end.
+
+or:
+
+> `gh` isn't available here, so I'll do all the file changes and give you a short list
+> of GitHub settings to apply at the end.
+
+Do not skip this. Silently omitting steps is what makes the run look broken.
+
+## A2 — Derive what you can
+
+Do not ask for either of these. Use `git`, not `gh` — every clone has `git`, whereas
+`gh` needs installing, authenticating and the right scopes, and the file edits below
+depend on getting these right:
+
+```bash
+git remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##'   # <org>/<repo>
+git symbolic-ref --short refs/remotes/origin/HEAD | sed 's#^origin/##'    # default branch
+```
+
+If either returns nothing, ask the user rather than guessing.
+
+## A3 — Ask three questions
 
 Propose a default for each so the user can simply accept it.
 
@@ -53,7 +79,7 @@ Propose a default for each so the user can simply accept it.
 | **Phase** — `Alpha`, `Beta` or `Live` | `Live` |
 | **Slack channel** — where a reader asks for help | `platops-build-notices` |
 
-## A3 — Write `config/tech-docs.yml`
+## A4 — Write `config/tech-docs.yml`
 
 ```yaml
 host: https://<org>.github.io/<repo>          # no trailing slash
@@ -69,7 +95,7 @@ default_owner_slack: <answer>
 Leave every other key as it is. The `Rakefile` reads `github_repo` from this file, so
 the link checker configures itself.
 
-## A4 — Align the workflows
+## A5 — Align the workflows
 
 Both trigger on `main`. If the default branch differs, change it in
 `.github/workflows/build.yaml` and `deploy.yaml` — otherwise nothing ever deploys and
@@ -84,47 +110,7 @@ true outside the template repository, so it does nothing there but confuse a rea
 
 Leave `build.yaml` alone; it has no guard.
 
-## A5 — Enable GitHub Pages
-
-```bash
-gh api -X POST repos/<org>/<repo>/pages -f build_type=workflow
-```
-
-A `409` means Pages is already enabled — fine, carry on. This sets the source to
-GitHub Actions. It does **not** control who can read the site.
-
-## A6 — STOP. The visibility step is manual
-
-**GitHub exposes no API for Pages visibility.** It must be set in the browser, and it
-is the step that decides whether the site is internal or world-readable.
-
-Tell the user:
-
-> Open **Settings → Pages → Visibility** and set it to **Private**, then tell me when
-> that is done. It is the only step I cannot do for you, and the one that makes the
-> site SSO-only.
-
-Wait. Do not continue assuming it has been done.
-
-## A7 — Verify it is actually private
-
-Never take "done" as evidence:
-
-```bash
-gh api repos/<org>/<repo>/pages --jq .public        # must print: false
-```
-
-If the site has deployed, check from outside as well:
-
-```bash
-curl -s -o /dev/null -w '%{http_code}' https://<org>.github.io/<repo>
-```
-
-`301`/`302` to `github.com/login` means protected. `200` serving content means it is
-**public** — send them back to A6 and do not report success. If `.public` is `true`,
-say plainly that the site is currently readable by anyone with the link.
-
-## A8 — Clear out the example content
+## A6 — Clear out the example content
 
 - Rewrite `source/index.html.md.erb` from a one-line description, keeping the
   frontmatter shape (`title`, `weight: 1`, `last_reviewed_on` today, `review_in`)
@@ -138,18 +124,48 @@ say plainly that the site is currently readable by anyone with the link.
 If they have no content yet, leave one example section so the sidebar is not empty, and
 say that you have.
 
-## A9 — Report
+## A7 — Report, then hand over the manual tasks
 
-Run `bundle exec middleman build` to confirm it still builds, then report:
+First report what you changed:
 
 | Item | State |
 |---|---|
 | `config/tech-docs.yml` | configured for `<org>/<repo>` |
 | Workflows | trigger on `<branch>`, template guard removed |
-| Pages | enabled, source: GitHub Actions |
-| **Visibility** | **private — verified `.public == false`** |
 | Example content | removed / retained |
-| Build | passes |
+
+Optionally confirm the build. This needs **Ruby and Node** locally, which many people
+will not have — if `bundle` is missing, say so and move on. The PR build verifies it
+anyway, and Codespaces has both:
+
+```bash
+bundle exec middleman build
+```
+
+### Manual tasks to complete
+
+Always end with this checklist, even if it is short. These are GitHub *settings* — they
+cannot be done by editing files.
+
+> **1. Enable Pages.** Settings → Pages → Source: **GitHub Actions**
+> **2. Make it internal.** Settings → Pages → Visibility: **Private**
+> **3. Confirm.** Once deployed, opening the site while signed out should redirect you
+>    to GitHub sign-in. If it serves the page instead, visibility is not set.
+
+If `gh` is available, offer to do 1 and verify 2 rather than leaving them on the list:
+
+```bash
+gh api -X POST repos/<org>/<repo>/pages -f build_type=workflow   # 409 = already on
+gh api repos/<org>/<repo>/pages --jq .public                     # must print: false
+```
+
+Both need repo admin. If either fails, do not retry or work around it — put the step
+back on the checklist and say why.
+
+**On visibility, never take "done" as evidence.** If you can check and `.public` is
+`true`, say plainly that the site is currently readable by anyone with the link. Note
+that GitHub usually defaults Pages to private for internal repositories, so this may
+already be correct — check before asking the user to change it.
 
 Then offer to add their first real page.
 
