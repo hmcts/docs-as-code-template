@@ -1,0 +1,40 @@
+---
+title: Docs as Code Template
+weight: 1
+last_reviewed_on: 2026-07-28
+review_in: 6 months
+---
+
+# <%= current_page.data.title %>
+
+Replace this page with your own home page. It is the first thing a reader sees and
+the entry point for the sidebar navigation.
+
+A good home page answers three questions in the first screenful: what this site
+covers, who it is for, and where to go next.
+
+## Getting started
+
+If you have just created this repository from the template, work through
+[SETUP.md](https://github.com/hmcts/docs-as-code-template/blob/main/SETUP.md)
+before writing content — a few settings have to be changed by hand.
+
+## Sections
+
+Group related pages into sections. Each section is a folder under `source/` with
+an `index.html.md.erb` that lists its pages, which is what the sidebar renders.
+
+| Section | Contents |
+|---|---|
+| [Example Section](example-section/index.html) | A worked example — one section index and one page |
+
+## Adding a page
+
+Ask your coding agent to add a page rather than copying files by hand:
+
+```
+/docs-site add a page about how our deployment pipeline works
+```
+
+The skill interviews you, creates the file from `source/templates/page-template.html.md.erb`
+with the correct frontmatter, updates the section index, and checks the result.
