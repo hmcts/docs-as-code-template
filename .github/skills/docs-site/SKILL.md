@@ -65,13 +65,26 @@ git symbolic-ref --short refs/remotes/origin/HEAD | sed 's#^origin/##'    # defa
 These read local git config — no network, no credentials. If `git` is unavailable or
 there is no remote, just ask. Do not infer either value any other way.
 
-## A2 — Ask three questions
+## A2 — Set the title, then ask two questions
 
-Propose a default for each so the user can simply accept it.
+**The service name is not a question.** Derive it from the repository name and apply it.
+Leaving it as the template's name is the most visible way to get this wrong — it puts
+"Docs as Code Template" in the header bar of someone else's site.
+
+Split the repo name on hyphens, title-case each word, and correct known casings
+(`AI`, `API`, `HMCTS`, `BCDR`, `CNP`, `PlatOps`):
+
+```
+platform-ai-gateway-docs  →  Platform AI Gateway Docs
+platops-bcdr-runbooks     →  PlatOps BCDR Runbooks
+```
+
+Tell the user what you set and offer to change it. Do not ask first.
+
+Then ask these two, proposing the default so they can simply accept:
 
 | Question | Default to propose |
 |---|---|
-| **Service name** — shown in the header bar | Repo name in title case: `platform-ai-gateway-docs` → "Platform AI Gateway Docs" |
 | **Phase** — `Alpha`, `Beta` or `Live` | `Live` |
 | **Slack channel** — where a reader asks for help | `platops-build-notices` |
 
@@ -108,8 +121,11 @@ Leave `build.yaml` alone; it has no guard.
 
 ## A5 — Clear out the example content
 
-- Rewrite `source/index.html.md.erb` from a one-line description, keeping the
-  frontmatter shape (`title`, `weight: 1`, `last_reviewed_on` today, `review_in`)
+- **Replace `source/index.html.md.erb` entirely.** The one shipped with the template is
+  a setup checklist, not a home page — if it survives, the published site tells readers
+  the site is unfinished. Write a real home page from a one-line description of what the
+  site covers, and set `title:` to the service name from A2. Keep the frontmatter shape
+  (`title`, `weight: 1`, `last_reviewed_on` today, `review_in`).
 - Rename `source/example-section/` to a real section and rewrite its `index.html.md.erb`
 - Delete `source/example-section/example-page.html.md.erb`
 - Rewrite `README.md` to describe this site rather than the template
