@@ -1,9 +1,9 @@
 # Docs as Code Template
 
 A starting point for HMCTS teams who want a documentation site built with the
-[GOV.UK Tech Docs Template](https://tdt-documentation.london.cloudapps.digital/),
-published to GitHub Pages and readable only by people signed in to the HMCTS
-GitHub organisation.
+[GOV.UK Tech Docs Template](https://github.com/alphagov/tech-docs-gem)
+([guidance](https://alphagov.github.io/tdt-documentation/)), published to GitHub Pages
+and readable only by people signed in to the HMCTS GitHub organisation.
 
 Write Markdown, raise a PR, merge — the site rebuilds and deploys itself.
 
@@ -24,17 +24,49 @@ Write Markdown, raise a PR, merge — the site rebuilds and deploys itself.
 
 ## Using this template
 
-1. Click **Use this template → Create a new repository** on GitHub.
-2. Set the visibility to **Internal**.
-3. Configure it. In **GitHub Copilot Chat** (agent mode) or **Claude Code**, invoke the
-   `docs-site` skill that came with the template:
-   ```
-   /docs-site set up this docs site
-   ```
-   Or follow **[SETUP.md](SETUP.md)** by hand.
+> **You cannot apply a template to a repository that already exists.** GitHub only
+> offers it at creation time. If you have already made an empty repo, delete it and
+> start at step 1 — otherwise you will end up copying files in by hand.
 
-Either way, one step has to be done in the browser: **Settings → Pages → Visibility →
-Private**. It is what makes the site readable only by signed-in org members.
+### 1. Create your repository from this one
+
+Go to **[hmcts/docs-as-code-template](https://github.com/hmcts/docs-as-code-template)**
+and click the green **Use this template** button at the top right, then
+**Create a new repository**.
+
+On the form that opens:
+
+| Field | What to set |
+|---|---|
+| Owner | `hmcts` |
+| Repository name | e.g. `platform-ai-gateway-docs` |
+| Visibility | **Internal** — a public repo cannot have an access-controlled site |
+
+Click **Create repository**, then clone it locally.
+
+### 2. Configure it
+
+In **GitHub Copilot Chat** (agent mode) or **Claude Code**, invoke the `docs-site`
+skill, which was copied into your repo along with everything else:
+
+```
+/docs-site set up this docs site
+```
+
+It sets the site title from your repository name, asks you two questions, makes all the
+file changes, and hands back a short list of GitHub settings to apply. Prefer to do it
+yourself? **[SETUP.md](SETUP.md)** has the same steps by hand.
+
+### 3. Turn on publishing
+
+Whichever route you took, this part is done in the browser and cannot be automated:
+
+**Settings → Pages** → Source: **GitHub Actions**, Visibility: **Private**.
+
+Visibility is the one that matters — it is what makes the site readable only by
+signed-in org members. Without it your documentation is on the public internet.
+
+Then commit, push, and the site deploys itself.
 
 ## Repository layout
 

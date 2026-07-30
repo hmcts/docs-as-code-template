@@ -1,28 +1,52 @@
 ---
-title: Docs as Code Template
+title: Your documentation site
 weight: 1
-last_reviewed_on: 2026-07-28
+last_reviewed_on: 2026-07-30
 review_in: 6 months
 ---
 
 # <%= current_page.data.title %>
 
-Replace this page with your own home page. It is the first thing a reader sees and
-the entry point for the sidebar navigation.
+**This is the template's placeholder home page.** If you are seeing it on a published
+site, setup is not finished — everything below is the checklist for finishing it.
 
-A good home page answers three questions in the first screenful: what this site
-covers, who it is for, and where to go next.
+The quickest route is to let the skill do it, in GitHub Copilot Chat (agent mode) or
+Claude Code:
 
-## Getting started
+```
+/docs-site set up this docs site
+```
 
-If you have just created this repository from the template, work through
-[SETUP.md](https://github.com/hmcts/docs-as-code-template/blob/main/SETUP.md)
-before writing content — a few settings have to be changed by hand.
+It does steps 1 to 4 and hands you step 5.
 
-## Sections
+## What to change
 
-Group related pages into sections. Each section is a folder under `source/` with
-an `index.html.md.erb` that lists its pages, which is what the sidebar renders.
+1. **Configuration** — `config/tech-docs.yml`. Six values still point at the template:
+   `service_name`, `host`, `github_repo`, `github_branch`, `header_links` and
+   `default_owner_slack`. The site builds either way, which is what makes this easy to
+   miss — check the header bar shows *your* service name, not "Docs as Code Template".
+2. **This page** — rewrite `source/index.html.md.erb`. A good home page answers three
+   things in the first screenful: what the site covers, who it is for, and where to go
+   next.
+3. **The example section** — rename `source/example-section/` to something real, rewrite
+   its `index.html.md.erb`, and delete `example-page.html.md.erb` once you have pages of
+   your own.
+4. **The README** — describe your site rather than the template.
+5. **Publish** — Settings → Pages → Source: **GitHub Actions**, Visibility: **Private**.
+   The second is what makes the site readable only by signed-in org members.
+
+## What to leave alone
+
+These are load-bearing — the build breaks, or the site loses its styling, without them:
+
+- `.github/page-template.md` — the page structure the `docs-site` skill copies
+- `source/images/` — favicons the layout references directly
+- `source/javascripts/` and `source/stylesheets/` — asset entry points
+
+## How the site is structured
+
+A **section** is a folder under `source/` containing an `index.html.md.erb` that lists
+its pages. The sidebar is built from that structure.
 
 | Section | Contents |
 |---|---|
@@ -30,11 +54,12 @@ an `index.html.md.erb` that lists its pages, which is what the sidebar renders.
 
 ## Adding a page
 
-Ask your coding agent to add a page rather than copying files by hand:
+Ask your coding agent rather than copying files by hand:
 
 ```
 /docs-site add a page about how our deployment pipeline works
 ```
 
-The skill interviews you, creates the file from `.github/page-template.md`
-with the correct frontmatter, updates the section index, and checks the result.
+It creates the file from `.github/page-template.md` with the right frontmatter, works
+out the sidebar ordering, updates the section index, and reports anything left as a
+placeholder.

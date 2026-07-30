@@ -1,6 +1,6 @@
 ---
 name: docs-site
-description: "Set up and maintain a documentation site created from the docs-as-code template. Use when asked to: set up the docs site, configure the template, add a page, create a page, document something, add a section. Handles first-time setup (config, GitHub Pages, SSO verification, clearing example content) and ongoing page creation."
+description: "Set up and maintain a documentation site created from the docs-as-code template. Use when asked to: set up the docs site, configure the template, add a page, create a page, document something, add a section. Edits files only — first-time configuration and ongoing page creation — and hands back a short checklist of GitHub settings to apply by hand."
 ---
 
 # Docs Site Skill
@@ -10,7 +10,11 @@ One skill, two jobs. Work out which is needed before doing anything.
 ## Step 0 — Which job is this?
 
 Read `github_repo` from `config/tech-docs.yml` and compare it with the actual
-repository (`gh repo view --json nameWithOwner --jq .nameWithOwner`).
+repository:
+
+```bash
+git remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##'
+```
 
 - **They differ, or `github_repo` is still `hmcts/docs-as-code-template`** → the site
   has never been configured. Run **Part A — First-time setup**, then offer Part B.
@@ -27,29 +31,60 @@ itself, which is not a published site and must not be configured as one.
 Get a freshly created repository to a published, SSO-only site. Most values come from
 the repository itself; only three need a human.
 
-## A1 — Derive what you can
+**Shape of this run:** this skill edits files. That is all it does. It makes no GitHub
+API calls, needs no credentials, and does not use `gh`. The two GitHub *settings* that
+cannot be changed by editing files go on a checklist at the end (A6) — applying them by
+hand takes under a minute.
 
-Do not ask for any of this:
+### Do not improvise around missing tools
 
-| Value | Command |
+If a command is unavailable, **abandon that approach**. Do not:
+
+- install anything — `brew`, `npm`, `apt` or any other package manager
+- reach for alternative tooling — MCP servers, other CLIs, hand-rolled API calls
+- search the environment, shell profiles or `.env` files for tokens or credentials
+- retry a failed command with different authentication
+
+Nothing here needs any of that. Ask the user, or put the item on the closing checklist.
+
+## A1 — Confirm the repository details
+
+Two values are needed. **Ask the user.** If `git` offers a sensible default, propose it
+so they only have to confirm:
+
+```bash
+git remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##'   # <org>/<repo>
+git symbolic-ref --short refs/remotes/origin/HEAD | sed 's#^origin/##'    # default branch
+```
+
+| Value | Example |
 |---|---|
-| `<org>/<repo>` | `gh repo view --json nameWithOwner --jq .nameWithOwner` |
-| default branch | `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` |
-| repo visibility | `gh repo view --json visibility --jq .visibility` |
+| `<org>/<repo>` | `hmcts/platform-ai-gateway-docs` |
+| default branch | `main` |
 
-If `gh auth status` fails, say which steps you cannot run and give the manual
-equivalent rather than failing part-way through.
+These read local git config — no network, no credentials. If `git` is unavailable or
+there is no remote, just ask. Do not infer either value any other way.
 
-If visibility is not `INTERNAL` or `PRIVATE`, warn plainly: a public repository cannot
-have an access-controlled Pages site, so the documentation would be world-readable.
+## A2 — Set the title, then ask two questions
 
-## A2 — Ask three questions
+**The service name is not a question.** Derive it from the repository name and apply it.
+Leaving it as the template's name is the most visible way to get this wrong — it puts
+"Docs as Code Template" in the header bar of someone else's site.
 
-Propose a default for each so the user can simply accept it.
+Split the repo name on hyphens, title-case each word, and correct known casings
+(`AI`, `API`, `HMCTS`, `BCDR`, `CNP`, `PlatOps`):
+
+```
+platform-ai-gateway-docs  →  Platform AI Gateway Docs
+platops-bcdr-runbooks     →  PlatOps BCDR Runbooks
+```
+
+Tell the user what you set and offer to change it. Do not ask first.
+
+Then ask these two, proposing the default so they can simply accept:
 
 | Question | Default to propose |
 |---|---|
-| **Service name** — shown in the header bar | Repo name in title case: `platform-ai-gateway-docs` → "Platform AI Gateway Docs" |
 | **Phase** — `Alpha`, `Beta` or `Live` | `Live` |
 | **Slack channel** — where a reader asks for help | `platops-build-notices` |
 
@@ -84,50 +119,13 @@ true outside the template repository, so it does nothing there but confuse a rea
 
 Leave `build.yaml` alone; it has no guard.
 
-## A5 — Enable GitHub Pages
+## A5 — Clear out the example content
 
-```bash
-gh api -X POST repos/<org>/<repo>/pages -f build_type=workflow
-```
-
-A `409` means Pages is already enabled — fine, carry on. This sets the source to
-GitHub Actions. It does **not** control who can read the site.
-
-## A6 — STOP. The visibility step is manual
-
-**GitHub exposes no API for Pages visibility.** It must be set in the browser, and it
-is the step that decides whether the site is internal or world-readable.
-
-Tell the user:
-
-> Open **Settings → Pages → Visibility** and set it to **Private**, then tell me when
-> that is done. It is the only step I cannot do for you, and the one that makes the
-> site SSO-only.
-
-Wait. Do not continue assuming it has been done.
-
-## A7 — Verify it is actually private
-
-Never take "done" as evidence:
-
-```bash
-gh api repos/<org>/<repo>/pages --jq .public        # must print: false
-```
-
-If the site has deployed, check from outside as well:
-
-```bash
-curl -s -o /dev/null -w '%{http_code}' https://<org>.github.io/<repo>
-```
-
-`301`/`302` to `github.com/login` means protected. `200` serving content means it is
-**public** — send them back to A6 and do not report success. If `.public` is `true`,
-say plainly that the site is currently readable by anyone with the link.
-
-## A8 — Clear out the example content
-
-- Rewrite `source/index.html.md.erb` from a one-line description, keeping the
-  frontmatter shape (`title`, `weight: 1`, `last_reviewed_on` today, `review_in`)
+- **Replace `source/index.html.md.erb` entirely.** The one shipped with the template is
+  a setup checklist, not a home page — if it survives, the published site tells readers
+  the site is unfinished. Write a real home page from a one-line description of what the
+  site covers, and set `title:` to the service name from A2. Keep the frontmatter shape
+  (`title`, `weight: 1`, `last_reviewed_on` today, `review_in`).
 - Rename `source/example-section/` to a real section and rewrite its `index.html.md.erb`
 - Delete `source/example-section/example-page.html.md.erb`
 - Rewrite `README.md` to describe this site rather than the template
@@ -138,18 +136,38 @@ say plainly that the site is currently readable by anyone with the link.
 If they have no content yet, leave one example section so the sidebar is not empty, and
 say that you have.
 
-## A9 — Report
+## A6 — Report, then hand over the manual tasks
 
-Run `bundle exec middleman build` to confirm it still builds, then report:
+First report what you changed:
 
 | Item | State |
 |---|---|
 | `config/tech-docs.yml` | configured for `<org>/<repo>` |
 | Workflows | trigger on `<branch>`, template guard removed |
-| Pages | enabled, source: GitHub Actions |
-| **Visibility** | **private — verified `.public == false`** |
 | Example content | removed / retained |
-| Build | passes |
+
+Optionally confirm the build. This needs **Ruby and Node** locally, which many people
+will not have — if `bundle` is missing, say so and move on. The PR build verifies it
+anyway, and Codespaces has both:
+
+```bash
+bundle exec middleman build
+```
+
+### Manual tasks to complete
+
+Always end with this checklist. These are GitHub *settings* and cannot be changed by
+editing files. Do not attempt them yourself — hand them over.
+
+> **1. Enable Pages.** Settings → Pages → Source: **GitHub Actions**
+> **2. Check visibility.** Settings → Pages → Visibility should be **Private**. GitHub
+>    usually sets this by default for internal repositories, so it may already be right.
+> **3. Commit and push.** The site deploys on push to the default branch.
+> **4. Confirm.** Signed out, opening the site should redirect you to GitHub sign-in.
+>    If it serves the page instead, visibility is not set — go back to 2.
+
+Step 4 is the one that matters: it is the only proof the documentation is not
+world-readable. Say so, rather than listing it as an afterthought.
 
 Then offer to add their first real page.
 
