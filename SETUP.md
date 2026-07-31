@@ -67,6 +67,8 @@ what makes this easy to skip.
 | `default_owner_slack` | The channel a reader should ask in |
 
 `phase` sets the badge next to the service name — `Alpha`, `Beta` or `Live`.
+The review-owner banner uses `owner_slack_workspace`, `default_owner_slack`,
+`show_expiry`, and `show_review_banner` from this same file.
 
 Nothing else needs editing: the `Rakefile` reads `github_repo` from this file, so the
 link checker configures itself.

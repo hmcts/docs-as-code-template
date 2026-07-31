@@ -100,6 +100,7 @@ title: Error codes
 weight: 20
 last_reviewed_on: 2026-07-28
 review_in: 6 months
+owner_slack: '#platops-help'   # optional; falls back to default_owner_slack
 ---
 ```
 
@@ -108,6 +109,21 @@ insert a page later without renumbering. A section's `index.html.md.erb` uses
 `weight: 1` and its pages start at `10`, so an index never ties with a page in the
 same folder. `last_reviewed_on` and `review_in` drive the review reminder shown on
 the page.
+
+Review banner flags:
+
+| Flag | Where | What it does |
+|---|---|---|
+| `last_reviewed_on` | Page frontmatter | The date the page was last reviewed |
+| `review_in` | Page frontmatter | Review interval from `last_reviewed_on` (for example `6 months`) |
+| `owner_slack` | Page frontmatter (optional) | Page-specific owner; overrides the default owner |
+| `default_owner_slack` | `config/tech-docs.yml` | Fallback owner when a page has no `owner_slack` |
+| `owner_slack_workspace` | `config/tech-docs.yml` | Slack workspace used to build owner links |
+| `show_expiry` | `config/tech-docs.yml` | Enables expiry state (not expired vs expired) |
+| `show_review_banner` | `config/tech-docs.yml` | Shows/hides the review banner entirely |
+
+When a page is overdue, a banner is shown similar to:
+"This page was set to be reviewed before … by the page owner."
 
 A **section** is a folder under `source/` containing an `index.html.md.erb` that lists
 its pages. The sidebar is built from that structure.
