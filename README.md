@@ -100,6 +100,7 @@ title: Error codes
 weight: 20
 last_reviewed_on: 2026-07-28
 review_in: 6 months
+owner_slack: '#platops-help'   # optional; falls back to default_owner_slack
 ---
 ```
 
@@ -107,7 +108,7 @@ review_in: 6 months
 insert a page later without renumbering. A section's `index.html.md.erb` uses
 `weight: 1` and its pages start at `10`, so an index never ties with a page in the
 same folder. `last_reviewed_on` and `review_in` drive the review reminder shown on
-the page.
+the page. When a page is overdue, a banner will displaying similar to: "This page was set to be reviewed before … by the page owner."
 
 A **section** is a folder under `source/` containing an `index.html.md.erb` that lists
 its pages. The sidebar is built from that structure.
